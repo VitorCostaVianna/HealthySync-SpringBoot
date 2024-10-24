@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<h1>Conectar Front-end ao Back-end</h1>
+<button id="botao">Obter Mensagem do Back-end</button>
+<p id="mensagem"></p>
+
+
+<input type="text" class="form-control" id="delete" placeholder="Digite o CPF" required>
+<button id="botao-delete">Deletar Pessoa do BD</button>
+
+<p id="resultado"></p>
+
+<input type="text" class="form-control" id="cpf" placeholder="Digite o CPF" required>
+<button id="botao-buscar">Buscar Pessoa</button>
+
+<!-- Campos que serão preenchidos após buscar a pessoa -->
+<input type="text" class="form-control" id="pac_nome" placeholder="Nome de usuário" required>
+<input type="email" class="form-control" id="pac_email" placeholder="Email" required>
+<button id="botao-atualizar">Atualizar Pessoa</button>
+
+<p id="resultado-atualizar"></p>
+
+
+<script>
+
+  document.getElementById("botao").addEventListener("click", function() {
+        fetch('http://localhost:8080/pacientes')
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById("mensagem").innerText = data;
+            })
+            .catch(error => console.error('Erro:', error));
+    });
+
+   document.getElementById("botao-delete").addEventListener("click", function() {
+    // Obtém o valor do campo de input
+    const cpf = document.getElementById("delete").value;
+
+    // Verifica se o campo de input não está vazio
+    if (cpf) {
+        // Faz a requisição DELETE
+        fetch(`http://localhost:8080/pacientes/${cpf}`, {
+            method: 'DELETE' // Define o método como DELETE
+        })
+        .then(response => {
+            if (response.ok) {
+                return response.text(); // Se a resposta for OK (200), retorna o texto da resposta
+            } else {
+                throw new Error('Erro ao deletar a pessoa'); // Caso contrário, lança um erro
+            }
+        })
+        .then(data => {
+            // Exibe o resultado da operação
+            document.getElementById("resultado").innerText = `Pessoa com  ${cpf} foi deletada com sucesso!`;
+        })
+        .catch(error => {
+            // Exibe o erro
+            document.getElementById("resultado").innerText = `Erro: ${error.message}`;
+        });
+    } else {
+        // Se o campo de input estiver vazio
+        document.getElementById("resultado").innerText = "Por favor, insira um ID.";
+    }
+});
+
+    // Função para buscar os dados da pessoa com o ID fornecido
+document.getElementById("botao-buscar").addEventListener("click", function() {
+    const cpf = document.getElementById("cpf").value;
+
+    if (cpf) {
+        fetch(`http://localhost:8080/pacientes/${cpf}`, {
+            method: 'GET'
+        })
+        .then(response => {
+            if (response.ok) {
+                return response.json(); // Converte a resposta para JSON
+            } else {
+                throw new Error('Pessoa não encontrada');
+            }
+        })
+        .then(data => {
+            // Preenche os campos com os dados retornados
+            document.getElementById("pac_nome").value = data.username;
+            document.getElementById("pac_email").value = data.email;
+        })
+        .catch(error => {
+            document.getElementById("resultado-atualizar").innerText = `Erro: ${error.message}`;
+        });
+    } else {
+        document.getElementById("resultado-atualizar").innerText = "Por favor, insira um ID.";
+    }
+});
+
+// Função para atualizar os dados da pessoa
+document.getElementById("botao-atualizar").addEventListener("click", function() {
+    const cpf = document.getElementById("cpf").value;
+    const username = document.getElementById("pac_nome").value;
+    const email = document.getElementById("pac_email").value;
+
+    if (cpf && username && email) {
+        fetch(`http://localhost:8080/pacientes/${cpf}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                username: username, // Corrigido aqui o nome da variável
+                email: email
+            })
+        })
+        .then(response => {
+            if (response.ok) {
+                return response.text();
+            } else {
+                throw new Error('Erro ao atualizar a pessoa');
+            }
+        })
+        .then(data => {
+            document.getElementById("resultado-atualizar").innerText = `Pessoa com ID ${cpf} foi atualizada com sucesso!`;
+        })
+        .catch(error => {
+            document.getElementById("resultado-atualizar").innerText = `Erro: ${error.message}`;
+        });
+    } else {
+        document.getElementById("resultado-atualizar").innerText = "Preencha todos os campos antes de atualizar.";
+    }
+});
+</script>
+</body>
+</html>
