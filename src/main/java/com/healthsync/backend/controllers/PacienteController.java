@@ -59,13 +59,6 @@ public class PacienteController{
         return ResponseEntity.noContent().build();
     }
 
-//    // Método para atualizar um paciente pelo Cpf
-//    @PutMapping(value = "/paciente/cpf/{cpf}")
-//    public ResponseEntity<Void> atualizar(@RequestBody Paciente p , @PathVariable String cpf){
-//        p.setCpf(cpf);  // Agora estamos utilizando o ID para atualizar
-//        this.pacienteService.atualizar(p);
-//        return ResponseEntity.noContent().build();
-//    }
 
     // Método para excluir um paciente pelo CPF
     @DeleteMapping(value = "/paciente/cpf/{cpf}")

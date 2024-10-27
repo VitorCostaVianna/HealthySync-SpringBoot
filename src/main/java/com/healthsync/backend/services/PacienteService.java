@@ -32,6 +32,7 @@ public class PacienteService {
                 .orElseThrow(() -> new ResourceNotFoundException("Paciente não encontrado com CPF: " + cpf));
     }
 
+
     @Transactional
     public Paciente criar(Paciente paciente) {
         return pacienteRepository.save(paciente);

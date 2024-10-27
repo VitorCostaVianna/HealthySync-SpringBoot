@@ -29,10 +29,10 @@ import java.util.Arrays;
 @Configuration
 public class WebSecurityConfig {
 
-  @Value("${jwt.public.key}")
-  private RSAPublicKey publicKey;
-  @Value("${jwt.private.key}")
-  private RSAPrivateKey privateKey;
+//  @Value("${jwt.public.key}")
+//  private RSAPublicKey publicKey;
+//  @Value("${jwt.private.key}")
+//  private RSAPrivateKey privateKey;
 
   @Bean
   public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
@@ -45,10 +45,10 @@ public class WebSecurityConfig {
           .cors(cors -> cors.configurationSource(corsConfigurationSource()))
           .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
           .authorizeHttpRequests(auth -> auth
-              .requestMatchers("/pacientes/**", "/login", "/", "/*").permitAll()
-              .requestMatchers(HttpMethod.DELETE, "/paciente/cpf/**").permitAll()
-              .requestMatchers(HttpMethod.PUT, "/paciente/id/**" ,  "/paciente/cpf/**" ).permitAll().
-              requestMatchers(HttpMethod.GET, "/paciente/id/**" ,  "/paciente/cpf/**" ).permitAll());
+              .requestMatchers("/pacientes/**", "/login","/funcionario/**" , "/", "/*").permitAll()
+              .requestMatchers(HttpMethod.DELETE, "/paciente/cpf/**, /funcionario/cpf/**").permitAll()
+              .requestMatchers(HttpMethod.PUT, "/paciente/id/**" ,  "/paciente/cpf/**",  "/funcionario/cpf/**" ).permitAll().
+              requestMatchers(HttpMethod.GET, "/paciente/id/**" ,  "/paciente/cpf/**", "/funcionario/cpf/**" ).permitAll());
 
       return http.build();
   }
@@ -65,17 +65,17 @@ public class WebSecurityConfig {
     return source;
   }
 
-  @Bean
-  public JwtDecoder jwtDecoder() {
-    return NimbusJwtDecoder.withPublicKey(publicKey).build();
-  }
-
-  @Bean
-  public JwtEncoder jwtEncoder() {
-    JWK jwk = new RSAKey.Builder(this.publicKey).privateKey(privateKey).build();
-    var jwks = new ImmutableJWKSet<>(new JWKSet(jwk));
-    return new NimbusJwtEncoder(jwks);
-  }
+//  @Bean
+//  public JwtDecoder jwtDecoder() {
+//    return NimbusJwtDecoder.withPublicKey(publicKey).build();
+//  }
+//
+//  @Bean
+//  public JwtEncoder jwtEncoder() {
+//    JWK jwk = new RSAKey.Builder(this.publicKey).privateKey(privateKey).build();
+//    var jwks = new ImmutableJWKSet<>(new JWKSet(jwk));
+//    return new NimbusJwtEncoder(jwks);
+//  }
 
   @Bean
   public BCryptPasswordEncoder bCryptPasswordEncoder() {

@@ -29,11 +29,10 @@ public class AdminUserConfig implements CommandLineRunner {
 
     @Override
     @Transactional
-    public void run(String... args) throws Exception {
-
+   public void run(String... args) throws Exception {
         var roleAdmin = roleRepository.findByName(Role.Values.ADMIN.name());
 
-        var userAdmin = funcionarioRepository.findByUsername("admin");
+        var userAdmin = funcionarioRepository.findByName("admin");
 
         userAdmin.ifPresentOrElse(
                 funcionario -> {
@@ -45,7 +44,7 @@ public class AdminUserConfig implements CommandLineRunner {
                     funcionario.setPassword(passwordEncoder.encode("123"));
                     funcionario.setRoles(Set.of(roleAdmin));
                     funcionarioRepository.save(funcionario);
-                }
-        );
+               }
+       );
     }
 }
