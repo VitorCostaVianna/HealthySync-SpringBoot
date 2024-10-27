@@ -1,6 +1,6 @@
 package com.healthsync.backend.services;
 
-import com.healthsync.backend.controllers.UpdateDto;
+import com.healthsync.backend.controllers.dto.UpdateDto;
 import com.healthsync.backend.exceptions.ResourceNotFoundException;
 import com.healthsync.backend.models.Paciente;
 import com.healthsync.backend.repositories.PacienteRepository;

@@ -2,16 +2,22 @@ package com.healthsync.backend.models;
 
 import jakarta.persistence.*;
 
+import java.util.Set;
+
 @Entity
 @Table(name = "funcionarios")
 public class Funcionario {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "fun_id")
     private  Long id;
 
     @Column(name = "fun_cpf", unique = true)
     private String cpf;
+
+    @Column(name = "fun_password", nullable = false)
+    private String password;
 
     @Column(name = "fun_nome")
     private String nome;
@@ -34,11 +40,19 @@ public class Funcionario {
     @Column(name = "especialidade")
     private String especialidade;
 
+    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "funcionario_roles",
+            joinColumns = @JoinColumn(name = "fun_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id")
+    )
+    private Set<Role> roles;
+
     public Funcionario(){
 
     }
 
-    public Funcionario(String cpf, String email, String nome, String telefone, Double salario, String cargo, String cidade, String especialidade) {
+    public Funcionario(String cpf, String email, String nome, String telefone, Double salario, String cargo, String cidade, String especialidade , String password) {
         this.setCpf(cpf);
         this.setEmail(email);
         this.setNome(nome);
@@ -47,6 +61,23 @@ public class Funcionario {
         this.setCargo(cargo);
         this.setCidade(cidade);
         this.setEspecialidade(especialidade);
+        this.setPassword(password);
+    }
+
+    public Set<Role> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(Set<Role> roles) {
+        this.roles = roles;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     public Long getId() {
@@ -142,6 +173,8 @@ public class Funcionario {
             throw new IllegalArgumentException("Funcionário não é médico");
         }
     }
+
+
 
     @Override
     public int hashCode() {
