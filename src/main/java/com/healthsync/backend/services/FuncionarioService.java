@@ -4,18 +4,22 @@ import com.healthsync.backend.controllers.dto.UpdateDtoFuncionario;
 import com.healthsync.backend.exceptions.ResourceNotFoundException;
 import com.healthsync.backend.models.Funcionario;
 import com.healthsync.backend.repositories.FuncionarioRepository;
+import com.healthsync.backend.repositories.RoleRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class FuncionarioService {
 
     private final FuncionarioRepository funcionarioRepository;
+    private final RoleRepository roleRepository;
 
-    public FuncionarioService(FuncionarioRepository funcionarioRepository) {
+    public FuncionarioService(FuncionarioRepository funcionarioRepository, RoleRepository roleRepository) {
         this.funcionarioRepository = funcionarioRepository;
+        this.roleRepository = roleRepository;
     }
 
     public List<Funcionario> obterTodos() {
@@ -38,14 +42,26 @@ public class FuncionarioService {
     }
 
     public Funcionario findByUsername(String nome){
-        return this.funcionarioRepository.findByName(nome)
+        return this.funcionarioRepository.findByNome(nome)
                 .orElseThrow(() -> new ResourceNotFoundException("Funcionario não encontrado"));
     }
 
     public void delete(String cpf) {
-        Funcionario funcionario = findByCpf(cpf);
-        funcionarioRepository.deleteById(funcionario.getId());
+        Optional<Funcionario> funcionario = funcionarioRepository.findByCpf(cpf);
+
+        // Verificamos se o funcionário foi encontrado
+        if (!funcionario.isPresent()) {
+            throw new IllegalArgumentException("Funcionário com CPF " + cpf + " não encontrado.");
+        }
+
+        // Primeiro, excluímos as roles associadas ao funcionário
+        roleRepository.deleteAll(funcionario.get().getRoles());
+
+        // Depois, excluímos o próprio funcionário
+        funcionarioRepository.deleteById(funcionario.get().getId());
     }
+
+
 
     @Transactional
     public void updateUserByCpf(String userCpf, UpdateDtoFuncionario updateDto) {
@@ -82,4 +98,6 @@ public class FuncionarioService {
     public Funcionario criar(Funcionario funcionario) {
         return funcionarioRepository.save(funcionario);
     }
+
+
 }

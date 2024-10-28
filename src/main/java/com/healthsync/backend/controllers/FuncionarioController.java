@@ -51,21 +51,41 @@ public class FuncionarioController {
 
     @Transactional
     @PostMapping("/funcionario")
-    public ResponseEntity<Void> createFuncionario(@RequestBody CreatDtoFuncionario dto){
+    public ResponseEntity<Void> createFuncionario(@RequestBody CreatDtoFuncionario dto) {
 
+        // Tenta encontrar o papel BASIC; se não for encontrado, trate o erro
         var basicRole = this.roleRepository.findByName(Role.Values.BASIC.name());
 
-        var funcionarioFromDb = this.funcionarioService.findByEmail(dto.email());
+        if (basicRole == null) {
+            throw new IllegalStateException("Papel BASIC não encontrado no banco de dados.");
+        }
 
+        // Prossegue para criar o novo Funcionario
         var funcionario = new Funcionario();
         funcionario.setNome(dto.nome());
+        funcionario.setCpf(dto.cpf());
+        funcionario.setEmail(dto.email());
+        funcionario.setCidade(dto.cidade());
+        funcionario.setCargo(dto.cargo());
+        funcionario.setEspecialidade(dto.especialidade());
+        funcionario.setTelefone(dto.telefone());
+        funcionario.setSalario(dto.salario());
         funcionario.setPassword(passwordEncoder.encode(dto.password()));
         funcionario.setRoles(Set.of(basicRole));
 
         funcionarioService.criar(funcionario);
 
-        return ResponseEntity.ok().build();
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
+
+    @PutMapping(value = "/funcionario/cpf/{cpf}")
+    public ResponseEntity<Void> atualizar(@PathVariable String cpf,
+                                          @RequestBody UpdateDtoFuncionario dtoFuncionario){
+        funcionarioService.updateUserByCpf(cpf, dtoFuncionario);
+        return ResponseEntity.noContent().build();
+    }
+
+
 
     @DeleteMapping(value = "/funcionario/cpf/{cpf}")
     public ResponseEntity<Void> excluir(@PathVariable String cpf) {

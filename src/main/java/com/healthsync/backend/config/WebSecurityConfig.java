@@ -10,7 +10,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
@@ -27,32 +30,35 @@ import java.security.interfaces.RSAPublicKey;
 import java.util.Arrays;
 
 @Configuration
+@EnableWebSecurity
+@EnableMethodSecurity
 public class WebSecurityConfig {
 
-//  @Value("${jwt.public.key}")
-//  private RSAPublicKey publicKey;
-//  @Value("${jwt.private.key}")
-//  private RSAPrivateKey privateKey;
+  @Value("${jwt.public.key}")
+  private RSAPublicKey publicKey;
+  @Value("${jwt.private.key}")
+  private RSAPrivateKey privateKey;
 
   @Bean
   public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
     return authConfig.getAuthenticationManager();
   }
 
-  @Bean
-  public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-      http.csrf(csrf -> csrf.disable())
-          .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-          .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-          .authorizeHttpRequests(auth -> auth
-              .requestMatchers("/pacientes/**", "/login","/funcionario/**" , "/", "/*").permitAll()
-              .requestMatchers(HttpMethod.DELETE, "/paciente/cpf/**, /funcionario/cpf/**").permitAll()
-              .requestMatchers(HttpMethod.PUT, "/paciente/id/**" ,  "/paciente/cpf/**",  "/funcionario/cpf/**" ).permitAll().
-              requestMatchers(HttpMethod.GET, "/paciente/id/**" ,  "/paciente/cpf/**", "/funcionario/cpf/**" ).permitAll());
+@Bean
+public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    http.csrf(AbstractHttpConfigurer::disable)
+        .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+        .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+        .authorizeHttpRequests(auth -> auth
+            .requestMatchers("/paciente/**" , "/funcionario/**", "/", "/*").permitAll()
+            .requestMatchers(HttpMethod.DELETE, "/paciente/cpf/**", "/funcionario/cpf/**").permitAll()
+            .requestMatchers(HttpMethod.PUT, "/paciente/id/**", "/paciente/cpf/**", "/funcionario/cpf/**").permitAll()
+            .requestMatchers(HttpMethod.GET, "/paciente/id/**", "/paciente/cpf/**", "/funcionario/cpf/**").permitAll()
+        );
 
-      return http.build();
-  }
-  
+    return http.build();
+}
+
 
   @Bean
   public CorsConfigurationSource corsConfigurationSource() {
@@ -65,17 +71,17 @@ public class WebSecurityConfig {
     return source;
   }
 
-//  @Bean
-//  public JwtDecoder jwtDecoder() {
-//    return NimbusJwtDecoder.withPublicKey(publicKey).build();
-//  }
-//
-//  @Bean
-//  public JwtEncoder jwtEncoder() {
-//    JWK jwk = new RSAKey.Builder(this.publicKey).privateKey(privateKey).build();
-//    var jwks = new ImmutableJWKSet<>(new JWKSet(jwk));
-//    return new NimbusJwtEncoder(jwks);
-//  }
+  @Bean
+  public JwtDecoder jwtDecoder() {
+    return NimbusJwtDecoder.withPublicKey(publicKey).build();
+  }
+
+  @Bean
+  public JwtEncoder jwtEncoder() {
+    JWK jwk = new RSAKey.Builder(this.publicKey).privateKey(privateKey).build();
+    var jwks = new ImmutableJWKSet<>(new JWKSet(jwk));
+    return new NimbusJwtEncoder(jwks);
+  }
 
   @Bean
   public BCryptPasswordEncoder bCryptPasswordEncoder() {

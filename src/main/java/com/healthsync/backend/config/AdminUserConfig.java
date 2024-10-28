@@ -29,22 +29,34 @@ public class AdminUserConfig implements CommandLineRunner {
 
     @Override
     @Transactional
-   public void run(String... args) throws Exception {
+    public void run(String... args) throws Exception {
+        // Verifica se o papel ADMIN existe; se não, cria e salva
         var roleAdmin = roleRepository.findByName(Role.Values.ADMIN.name());
 
-        var userAdmin = funcionarioRepository.findByName("admin");
+        if (roleAdmin == null) {
+            roleAdmin = new Role();
+            roleAdmin.setName(Role.Values.ADMIN.name());
+            roleRepository.save(roleAdmin);
+        }
 
+        // Procura um usuário admin
+        var userAdmin = funcionarioRepository.findByNome("admin");
+
+        Role finalRoleAdmin = roleAdmin;
         userAdmin.ifPresentOrElse(
-                funcionario -> {
-                    System.out.println("admin ja existe");
-                },
+                funcionario -> System.out.println("admin já existe"),
                 () -> {
                     var funcionario = new Funcionario();
                     funcionario.setNome("admin");
                     funcionario.setPassword(passwordEncoder.encode("123"));
-                    funcionario.setRoles(Set.of(roleAdmin));
+
+                    // Associa o papel ADMIN ao novo usuário admin
+                    funcionario.setRoles(Set.of(finalRoleAdmin));
                     funcionarioRepository.save(funcionario);
-               }
-       );
+                    System.out.println("Usuário admin criado com sucesso.");
+                }
+        );
     }
+
+
 }
